@@ -1,8 +1,18 @@
 # Twitter Dashboard 2.0: Redux Revisited
 
-## Table Of Contents
+1. Start by installing dependencies: `npm install`
 
+2. Run the build script in watch mode: `npm run start`
 
+3. Visit the application on [http://localhost:9999/](http://localhost:9999/)
+
+4. Follow this readme
+
+5. Ask for help when/if you get stuck
+
+6. Have loads of fun!
+
+[Slides are available here](https://github.com/ewendel/slidesets/blob/master/redux-workshop.pdf)
 
 ## Task 1: Basic Redux application flow
 
@@ -24,6 +34,10 @@ We'll be doing these tasks in the file `src/index.js` in the project root.
 We need a store. Redux advocates having all your application data in a single object structure, but we'll need some layer of abstraction instead of just using a plain old javascript object.
 
 Redux gives us a convenient function, namely `createStore()`.
+
+```javascript
+import { createStore } from 'redux';
+```
 
 Use this to get yourself a shiny new store, ready to be filled with our application data.
 Try to call `createStore` without any parameters initially, and check the browser console.
@@ -348,6 +362,9 @@ import configureStore from './configureStore';
 const store = configureStore();
 ```
 
+`configureStore` expects a file called `reducers/index.js` to be present and exporting a valid reducer.
+* Create `reducers/index.js` that imports your tweet reducer and exports it as default
+
 While you're at it, import the `<DevTools>` component we've made (`./containers/DevTools`) and modify your `render` call so it looks like this:
 
 ```javascript
@@ -414,6 +431,7 @@ function rootReducer(state = initialState, action) {
     route: routeReducer(state.route, action)
   };
 }
+export default rootReducer;
 ```
 
 This works, but will become cumbersome when we have more than two reducers. Luckily, Redux provides the aptly named function `combineReducers`. This function turns an object whose values are reducers into a combined reducer that works like the one we made. The shape of the resulting combined state will match the keys of the passed object of reducers. We also do not need to specify the initial state of this combined reducer as it will use the initial states of each of the individual reducers.
@@ -474,6 +492,29 @@ Update `mapStateToProps` to also send the active route to our `App` component. W
 Now you should be able to click the nice links and see that the view switches between the tweet feed and the other view.
 
 ## Task 6: Displaying Tweets On A Map
+Showing an ever updating list of tweets is pretty cool, but what if we want to see where each tweet was sent from?
+Luckily for you someone left some files in your project. Take a look at `components/CurrentTweet.jsx`, `components/TweetMap.jsx` and `containers/Map.jsx`.
+
+Remember in the last task where we told you that you could render whatever you wanted when the active route is `/`?
+Now try rendering the Map component there instead!
+
+### Step I: Clicking A Tweet
+Wouldn't it be cool if we could click a tweet marker on the map and see what that person was thinking about?
+
+As you may have noticed by looking through the files mentioned above there is a click handler wired up to tweet markers on the map. Currently the app complains when you click a marker. Fix this by creating the action creator that `<Map>` tries to call.
+
+Now the app is not complaining anymore, but nothing happens. Let's create another reducer to handle the action you returned from the action creator.
+Call this reducer `reducers/view.js`, as it will contain view state, and make it have an object with a property `currentTweet` as its state shape.
+
+If you now go to `mapStateToProps` in `containers/Map.jsx` and pick the current tweet from the state, you should be able to click a marker on the map and see the tweet appear on the screen!
+
+##### Do the following:
+* Create `setCurrentTweet` action creator
+* Create `reducers/view.js`
+
+### Step II: Visualizing the Clicked Tweet on the Map
+In `containers/Map.jsx`, try to give the currently clicked Tweet marker a different color.
+*(Protip: You can 'enhance' the tweets by also making them have a property `color`, which will be picked up by `<TweetMap>`)*
 
 
 ## Task 7: Filtering Tweets
@@ -546,7 +587,7 @@ Now it is time to actually filter the tweets. Let's start with the tweets displa
 In the function `mapStateToProps` we pick up `filters`and `tweets`, thus, here we have everything we need.
 Make a utility function `getViewTweets(tweets, filters)` that returns an array of all the tweets that match one or more of the active filters.
 If there are no active filters, the function should return the 100 most recent tweets, as before.
-Inside `mapStateToProps`, instead of returning a sliced array of tweets, use you newly created utility-function to return the "view" tweets.
+Inside `mapStateToProps`, instead of returning a sliced array of tweets, use your newly created utility-function to return the "view" tweets.
 Hint: It might be an idea to create a filter with a high match rate, so that you can quicly see if your implementation is correct.
 For instance:
 ```
@@ -558,14 +599,13 @@ For instance:
   }
 ```
 Now, we are going to need the exact same functionality in the `Map` component.
-Let's make our utility function reusable by putting it into a separate file and exporting it into both the `Map` and `Feed` component.
+Let's make our utility function reusable by putting it in a separate file and importing it into both the `Map` and `Feed` component.
 When you have completed this task, only tweets that match the active filter should show up in the Feed and on the Map.
 
 ### Step III: Adding color
-Edit your `getViewTweets` function so that it not only filters the tweets, but also adds the prop color of the filter it matches.
-If it does not match any filters, add the color red.
+Edit your `getViewTweets` function so that it not only filters the tweets, but also adds the prop color of the filter it matches. Remember we did something like this for the `currentTeet`?
+If a tweet does not match any filters, use the color red.
 If you have used the correct CSS classes, both the Map and the Feed should now clearly indicate which filter the tweets match.
-
 
 ## Task 8: Creating new filters
 ### Step I:
@@ -574,29 +614,29 @@ For this, we need a form component with the exotic name `FilterForm`.
 We will start by only rendering the html, with no form logic.
 The HTML should look something like this
  ```html
- <form className="filter-form">
-       <h3>New filter</h3>
-       <div className="input-wrapper">
-           <label for="name">Name</label>
-           <input type="text" id="name" name="name"/>
-       </div>
-       <div className="input-wrapper">
-           <label for="hashtag">#</label>
-           <input type="text" id="hashtags" name="hashtags"/>
-       </div>
-       <div className="input-wrapper">
-          <label for="text">Text</label>
-          <input type="text" id="text" name="text"/>
-        </div>
-        <div className="input-wrapper">
-            <label for="color">Marker color</label>
-            <select name="color">
-              <option key="green" value="green">Green</option>
-              <option key="pink" value="green">Pink</option>
-            </select>
-        </div>
-        <button>Save</button>
-     </form>
+<form className="filter-form">
+ <h3>New filter</h3>
+ <div className="input-wrapper">
+     <label for="name">Name</label>
+     <input type="text" id="name" name="name"/>
+ </div>
+ <div className="input-wrapper">
+     <label for="hashtag">#</label>
+     <input type="text" id="hashtags" name="hashtags"/>
+ </div>
+ <div className="input-wrapper">
+    <label for="text">Text</label>
+    <input type="text" id="text" name="text"/>
+  </div>
+  <div className="input-wrapper">
+      <label for="color">Marker color</label>
+      <select name="color">
+        <option key="green" value="green">Green</option>
+        <option key="pink" value="green">Pink</option>
+      </select>
+  </div>
+  <button>Save</button>
+</form>
  ```
 Tip: You may want to make a separate `InputField` component to DRY things up.
 
@@ -604,13 +644,13 @@ Before we put the new component into our GUI, let's make a wrapper component `Fi
 
 ```html
 <div className="filter-container">
-  <h2>Filters & Stats</h2>
+  <h2>Filters</h2>
   <FilterList/>
   <FilterForm/>
 </div>
 ```
 
-Note: remove the `className="filter-container"` prop in the `FilterList`, otherwise the html will look strange.
+Note: remove the `className="filter-container"` prop in the `FilterList`, otherwise the HTML will look strange.
 Replace the `FilterList` child component in `Feed` and `Map` with your newly created `FilterContainer`.
 When you have completed this task there should be a form in the GUI.
 
@@ -621,7 +661,7 @@ https://facebook.github.io/react/docs/forms.html.
 
 In the example they are using in the React documentation they use `setState` inside the `handleChange` function.
 Using `setState` means storing the state locally, in the component.
-However, since we have a tool for handling state, namely, Redux, we don't need to use `setState`.
+However, since we have an awesome tool for handling state - Redux, we don't need to use `setState`.
 We can just use actions and reducers and make the form a part of our redux state tree. So, guess what? Time to make a new reducer `form`.
 The initial state of the `form` should have the following representation:
 ```javascript
@@ -632,27 +672,137 @@ const initialState = {
   color: ''
 }
 ```
-The new reducer should handle two cases `FORM_UPDATED` with the `formUpdate(field)` action creator and `FORM_SUBMITTED` with the `formSubmit()`action creator.
-The field shoud be an object with a key (the field name) and a value (the field value).
+The new reducer should handle two actions `FORM_UPDATED` and `FORM_SUBMITTED`, sent from the `formUpdate(field)` and `formSubmit()` action creators.
+The `field` object passed to `formUpdate()` should contain the field name and the field value.
 
-You may want to connect the `FilterForm` component so that you don't have to pass form callbacks and form state all the way from `Feed` down to the input fields.
-Once the `FilterForm` component is connected, you can hook up the form state with the `value` prop of the input and select form elements.
-You can also create a callback function `updateForm` that dispatches `formFilterUpdate(field)`.
+You may want to connect the `FilterForm` component so that you don't have to pass form callbacks and form state all the way from `Feed` down to the form fields.
+You can create a callback function `updateForm` inside `FilterForm` that dispatches `formFilterUpdate(field)`.
 Pass the `updateForm` function down to the input field, so that you end up with something along the lines of
 ```
-<input type="text" id={name} name={text} value={value} onChange={(event) => updateForm({key: 'text', value: event.target.value  })} />
+<input type="text" id="text" name="text" value={value} onChange={(event) => updateForm({key: 'text', value: event.target.value  })} />
 ```
-
 When you have completed this task you should be able to fill the form fields and there should be actions firing in the Redux panel on every key stroke.
 
 ### Step III Submitting the form
 When the user presses the save button in the form, three things should happen
+
 1) The form should not be displayed in the GUI, we should only see the filters.
 Thus we need to extend our `view` state object with a new prop: `formVisibility`.
 The reducer should be extended with two cases `FORM_HIDE` and `FORM_SUBMITTED`, the latter action type we created in Step II.
 When the `Form` is hidden, that is, when `formVisibilty: false`, the `FilterList` should be visible, along with a button ```<button>New filter</button>```.
-When the `Form` is displayed, the `FilterList` and the button should be hidden. Hint: You may want to use the `If`-components introduced in task 5.
+When the `Form` is displayed, the `FilterList` and the "new filter" button should be hidden.
 
 2) The form fields should be cleared
 
-3) The form data should be submitted into our json
+3) The form data should be submitted into our fake db.json database, we will do this in the next task
+
+## Task 9: Async actions
+### Step I: Fetching data from backend
+Now, it is time to learn how to post and fetch filter data from the backend.
+
+We have created a fake REST-API using [json-server](https://www.npmjs.com/package/json-server).
+In the file `db.json` we have stored some data which you can check out at
+http://localhost:9999/api/filters. This will also be the url for your api calls.
+
+We will be using [`superagent`](https://www.npmjs.com/package/superagent) for
+http requests in our examples (and it is already present in `node_modules`),
+however you are free to use other libraries if you wish.
+
+Example get request using superagent:
+
+```javascript
+superagent
+  .get('/some-url')
+  .end(function(err, response){
+      // Do something
+  });
+```
+
+Note that `response.body` is already a javascript object, so there is no need
+for `JSON.parse`. You can find some useful snippets for our API in [API.md](API.md)
+
+We want to fetch the data from `/api/filters` and use this to initialize our app, i.e. set the state of our `filters` reducer.
+We will fetch this data by doing our http request in a new action creator `fetchFilters` in the file `actions.js`.
+Before we do this, let's learn some more about action creators.
+So far our action creators have returned plain action objects such as:
+
+```javascript
+function startRequest() {
+  return {
+    type: REQUEST_STARTED
+  }
+}
+```
+
+But in Redux, if you have a library called `thunk` (which we have already included in the node_modules and also set up for you in `configureStore.js`), action creators can also return functions.
+If you return a function, you will get `dispatch` as an argument so we can do this:
+
+```javascript
+function startAsyncRequest() {
+ return dispatch => {
+    dispatch({
+      type: ASYNC_REQUEST_STARTED
+    });
+  }
+}
+```
+For api-requests this means that when we initiate an API-call, we can first dispatch an action saying "a request has started", in our case: `FILTERS_REQUEST_STARTED`.
+This is helpful if we, for instance, want to show a spinner in the GUI.
+After dispatching this action, we can start our api call and dispatch a new action when we receive a response, for instance `FILTERS_REQUEST_FAILED` or `FILTERS_REQUEST_SUCCEEDED`.
+We should end up with something like this
+
+```javascript
+dispatch({ type: 'REQUEST_STARTED' });
+
+request('/api', function (err, result) {
+  if (err) {
+    dispatch({ type: 'REQUEST_FAILED', err });
+  } else {
+    dispatch({ type: 'REQUEST_SUCCEDED', result });
+  }
+});
+```
+
+Implement the action creator `fetchFilters` where you call the `/api/filters` endpoint and dispatch a `FILTER_REQUEST_SUCCEEDED` action on a successful (200 OK) response.
+Call this action creator on app startup in the `index.js` file like so.
+```
+store.dispatch(fetchFilters());
+```
+Test to see if it works by inspecting the dev tools panel.
+
+Now it is time to implement the corresponding reducer in reducers/filters.js.
+First, set `initialState = []` since we will now fetch the filter data from the
+response returned from the API.
+Next, expand the switch statement to act on your new `FILTER_REQUEST_SUCCEEDED` action.
+If you are succesfull, the filters in the db.json file should be visible in your gui.
+You should also find a way to handle a failed response, by showing an error message.
+Lastly, try showing a loading message when you are waiting for the async request.
+
+### Step II: Posting data to the backend
+Lastly, it is time to finish the CRUD process, namely save the data in the form when you click the submit button.
+We think, by now, you have learned enough to be able to complete this task on your own. See it as a challenge!
+Hint: take a look at the [API.md](API.md) file.
+
+
+## Task 10: Testing!
+
+This is a relatively open task. We have included some nice libraries for testing your code, namely [`enzyme`](https://github.com/airbnb/enzyme), [`mocha`](https://mochajs.org/) and [`expect`](https://github.com/mjackson/expect). We have also created a script to run tests.
+Use
+```shell
+npm test
+```
+to run your tests once, and
+```shell
+npm run test:watch
+```
+to run your tests in "watch mode". This mode will rerun your tests when you update your code.
+The test runner will pick up files ending with `*.test.js`, for example the file `reducers/view.test.js`.
+
+Hopefully by now you will have noticed that we have written our whole app using pure functions (_even our React components!_), so testing them should be a breeze!
+
+
+
+
+
+
+
