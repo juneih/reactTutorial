@@ -1,11 +1,13 @@
-import {createStore} from 'redux';
+import { Provider } from 'react-redux';
+import configureStore from './configureStore';
 import React from 'react';
 import { render } from 'react-dom';
 import  App from './containers/App.jsx';
-import reducer from './reducers/tweets';
+import DevTools from './containers/DevTools';
 
 
-let store = createStore(reducer);
+
+const store = configureStore();
 
 
 const ws = new WebSocket('ws://twitterws.herokuapp.com');
@@ -19,10 +21,15 @@ ws.onmessage = ms => {
   }
 };
 
-let MyApp = () => {
-	render(<App tweets={store.getState()} />, document.querySelector('#app'));
-}
 
-store.subscribe(MyApp, document.querySelector('#app'));
+render (
+	<Provider store={ store }>
+	<div>
+		<App />
+		<DevTools />
+	</div>
+</Provider>,
+document.querySelector('#app')	
+);
 
 

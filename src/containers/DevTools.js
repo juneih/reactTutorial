@@ -7,8 +7,8 @@ import DockMonitor from 'redux-devtools-dock-monitor';
 import { TWEET_RECEIVED } from '../actions';
 
 const actionBlackList = [
-  'REMOVE THIS LINE AND UNCOMMENT THE NEXT'
-  // TWEET_RECEIVED
+  //'REMOVE THIS LINE AND UNCOMMENT THE NEXT'
+   TWEET_RECEIVED
 ];
 
 export default createDevTools(

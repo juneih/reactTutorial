@@ -1,15 +1,16 @@
+import { connect } from 'react-redux';
 import React from 'react';
-import Tweet from '../components/Tweet.jsx';
+import TweetFeed from '../components/TweetFeed.jsx';
 
 let App =  (props) => {
 	
-	const tweetList = props.tweets.map((tweet) => {
-		return <li><Tweet tweet={tweet} /></li>
-	});
-
-	return (<ul className="tweetList">
-			{tweetList}
-		</ul>);
+	return (<TweetFeed tweets={props.tweets} />);
 }
 
-export default App;
+let mapStateToProps = (state)=> {
+  return {
+	tweets: state
+  }
+}
+export default connect(mapStateToProps)(App);
+
