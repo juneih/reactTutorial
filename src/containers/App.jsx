@@ -8,8 +8,9 @@ let App =  (props) => {
 }
 
 let mapStateToProps = (state)=> {
+    console.log('mapstatetoprops state in app.jsx',state);
   return {
-	tweets: state
+	tweets: state.tweets
   }
 }
 export default connect(mapStateToProps)(App);
