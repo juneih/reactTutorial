@@ -15,7 +15,7 @@ const MAX_TWEETS = 10;
 
 ws.onmessage = ms => {
   const tweet = JSON.parse(ms.data);
-  if (store.getState().length < MAX_TWEETS) {
+  if (store.getState().tweets.length < MAX_TWEETS) {
 	// add new tweet here by dispatching action
 	store.dispatch({ type: 'TWEET_REEIVED', newTweet: tweet});
   }
