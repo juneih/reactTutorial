@@ -24,12 +24,12 @@ ws.onmessage = ms => {
 
 render (
 	<Provider store={ store }>
-	<div>
-		<App />
-		<DevTools />
-	</div>
-</Provider>,
-document.querySelector('#app')	
+    	<div>
+    		<App />
+    		<DevTools />
+    	</div>
+    </Provider>,
+    document.querySelector('#app')
 );
 
 
