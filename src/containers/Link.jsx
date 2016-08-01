@@ -8,9 +8,11 @@ class Link extends React.Component {
             type: 'ROUTE_CHANGED',
             route: to
         };
-        return ( <a className={className}
-                    href={'#$to'}
-                    onClick={dispatch(action)}>
+        var changeRoute = () => dispatch(action); 
+        return ( 
+                <a className={className}
+                    href={`#${to}`}
+                    onClick={changeRoute} >
                 </a> )
     }
 }
