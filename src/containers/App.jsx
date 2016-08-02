@@ -2,10 +2,12 @@ import { connect } from 'react-redux';
 import React from 'react';
 import TweetFeed from '../components/TweetFeed.jsx';
 import Link from '../containers/Link.jsx';
+import TweetMap from '../components/TweetMap.jsx';
 
 let App =  (props) => {
 
-    var content = <div>Whaaaaat!</div>;
+    var tmp = () => {};
+    var content = <TweetMap tweets={props.tweets} onTweetClick={tmp} />;
     console.log('props.route is', props.route);
     if ( props.route == "/feed" ){
         content = <TweetFeed tweets={props.tweets} />;
